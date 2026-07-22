@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 from app.config import settings
 from app.api.v1.router import api_router
-from app.database import engine, Base  # ✅ Import Base from database, not models
+from app.database import engine, Base
 
 # Load environment variables
 load_dotenv()
@@ -35,22 +35,8 @@ app = FastAPI(
 # ============================================================================
 # CORS Configuration
 # ============================================================================
-# Get allowed origins from settings or environment
-allowed_origins = getattr(settings, 'BACKEND_CORS_ORIGINS', [])
-
-# If no origins configured, use defaults
-if not allowed_origins:
-    allowed_origins = [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "https://campusfix-frontend.vercel.app",
-        "https://*.vercel.app",
-        os.getenv("FRONTEND_URL", ""),
-    ]
-    # Remove empty strings
-    allowed_origins = [origin for origin in allowed_origins if origin]
+# Get allowed origins from settings
+allowed_origins = settings.BACKEND_CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
@@ -142,13 +128,12 @@ app.include_router(api_router, prefix="/api/v1")
 @app.on_event("startup")
 def on_startup():
     """Run on application startup."""
-    print("🚀 Starting CampusFix API...")
-    print(f"📡 Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    print(f"🗄️ Database: Connected to {settings.DATABASE_URL[:50]}...")
-    print("✅ API is ready!")
+    print("Starting CampusFix API...")
+    print(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
+    print("API is ready!")
 
 
 @app.on_event("shutdown")
 def on_shutdown():
     """Run on application shutdown."""
-    print("🛑 Shutting down CampusFix API...")
+    print("Shutting down CampusFix API...")
